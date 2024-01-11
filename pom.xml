@@ -81,12 +81,6 @@
       <artifactId>annotations</artifactId>
     </dependency>
     <dependency>
-      <groupId>br.com.mike</groupId>
-      <artifactId>seguranca</artifactId>
-      <version>1.0</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
       <version>42.6.0</version>
@@ -95,6 +89,14 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-tx</artifactId>
       <version>6.1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-rest-client-reactive</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-rest-client-reactive-jsonb</artifactId>
     </dependency>
   </dependencies>
   <build>
