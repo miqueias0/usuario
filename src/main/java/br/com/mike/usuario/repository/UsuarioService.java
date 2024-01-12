@@ -1,12 +1,11 @@
-package br.com.mike.repository;
+package br.com.mike.usuario.repository;
 
-import br.com.mike.dao.IUsuario;
-import br.com.mike.modelo.Usuario;
+import br.com.mike.usuario.dao.IUsuario;
+import br.com.mike.usuario.modelo.Usuario;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.SQLException;
 import java.util.UUID;
 
 @Service

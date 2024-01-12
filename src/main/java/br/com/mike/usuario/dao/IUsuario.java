@@ -1,6 +1,6 @@
-package br.com.mike.dao;
+package br.com.mike.usuario.dao;
 
-import br.com.mike.modelo.Usuario;
+import br.com.mike.usuario.modelo.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 

@@ -1,4 +1,4 @@
-package br.com.mike.modelo;
+package br.com.mike.usuario.modelo;
 
 import jakarta.persistence.*;
 import java.io.Serializable;

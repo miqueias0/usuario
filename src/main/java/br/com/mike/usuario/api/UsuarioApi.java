@@ -1,16 +1,15 @@
-package br.com.mike.api;
+package br.com.mike.usuario.api;
 
-import br.com.mike.api.loginModelo.LoginModelo;
-import br.com.mike.modelo.Usuario;
-import br.com.mike.record.AutenticacaoRecord;
-import br.com.mike.record.TokenRecord;
-import br.com.mike.record.UsuarioRecord;
-import br.com.mike.repository.UsuarioService;
-import br.com.mike.service.AutenticationService;
+import br.com.mike.usuario.modelo.Usuario;
+import br.com.mike.usuario.record.LoginRecord;
+import br.com.mike.usuario.record.UsuarioRecord;
+import br.com.mike.comum.records.AutenticacaoRecord;
+import br.com.mike.comum.records.TokenRecord;
+import br.com.mike.usuario.repository.UsuarioService;
+import br.com.mike.comum.service.AutenticationService;
 import jakarta.inject.Inject;
 import jakarta.transaction.UserTransaction;
 import jakarta.ws.rs.core.Context;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -25,9 +24,7 @@ public class UsuarioApi {
     private UsuarioService usuarioService;
     @Inject
     private UserTransaction userTransaction;
-    @Inject
-    @RestClient
-    private AutenticationService seguranca;
+    private AutenticationService seguranca =  new AutenticationService("http://localhost:8081");;
 
     public UsuarioApi() {
     }
@@ -35,7 +32,7 @@ public class UsuarioApi {
     @GetMapping(value = "/obterPorId")
     public ResponseEntity<UsuarioRecord> obterPorId(@Context HttpHeaders sec) throws Exception {
         try {
-            AutenticacaoRecord autenticacaoRecord = seguranca.validarToken(sec.get("authorization").get(0)).readEntity(AutenticacaoRecord.class);
+            AutenticacaoRecord autenticacaoRecord = seguranca.validarToken(sec.get("authorization").get(0));
             UsuarioRecord usuarioRecord = converterUsuario(usuarioService.obterPorId(autenticacaoRecord.identificador()));
             return ResponseEntity.ok().body(usuarioRecord);
         } catch (Exception e) {
@@ -48,9 +45,9 @@ public class UsuarioApi {
     public ResponseEntity<TokenRecord> manter(@RequestBody UsuarioRecord usuarioRecord) throws Exception {
         try {
             userTransaction.begin();
-            TokenRecord token = seguranca.criarToken(usuarioService.manter(converterUsuarioRecord(usuarioRecord)).getId(), 300).readEntity(TokenRecord.class);
+            TokenRecord token = seguranca.criarToken(usuarioService.manter(converterUsuarioRecord(usuarioRecord)).getId(), 300);
             userTransaction.commit();
-            return new ResponseEntity<>(null, HttpStatus.CREATED);
+            return new ResponseEntity<>(token, HttpStatus.CREATED);
         } catch (Exception e) {
             userTransaction.rollback();
             throw new Exception("Erro ao manter usuario pelo seguinte motivo: " + (e.getLocalizedMessage() != null ? e.getLocalizedMessage(): ""));
@@ -72,11 +69,11 @@ public class UsuarioApi {
     }
 
     @PostMapping(value = "/login")
-    public ResponseEntity<TokenRecord> login(@RequestBody LoginModelo loginModelo) throws Exception{
+    public ResponseEntity<TokenRecord> login(@RequestBody LoginRecord loginRecord) throws Exception{
         try {
-            Usuario usuario = usuarioService.login(converterUsuarioRecord(loginModelo.getUsuario()));
+            Usuario usuario = usuarioService.login(converterUsuarioRecord(loginRecord.usuario()));
             TokenRecord tokenRecord = seguranca.criarToken(
-                    usuario.getId(), loginModelo.getManterLogado()? null: 300).readEntity(TokenRecord.class);
+                    usuario.getId(), loginRecord.manterLogado() == null || loginRecord.manterLogado() ? null: 300);
             return ResponseEntity.ok().body(tokenRecord);
         } catch (Exception e) {
             throw new Exception((e.getLocalizedMessage() != null ? e.getLocalizedMessage(): ""));
@@ -86,8 +83,8 @@ public class UsuarioApi {
     @GetMapping(value = "/loginComToken")
     public ResponseEntity<TokenRecord> loginComToken(@Context HttpHeaders sec) {
         try {
-            TokenRecord tokenRecord = seguranca.atualizarToken(sec.get("authorization").get(0)).readEntity(TokenRecord.class);
-            return ResponseEntity.ok().body(null);
+            TokenRecord tokenRecord = seguranca.atualizarToken(sec.get("authorization").get(0));
+            return ResponseEntity.ok().body(tokenRecord);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
